@@ -40,7 +40,6 @@ print("======================================")
 
 # Exchange Public Keys
 
-
 # Receive server's public key
 server_public_bytes = client_socket.recv(2048)
 
