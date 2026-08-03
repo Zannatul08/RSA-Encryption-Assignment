@@ -3,9 +3,9 @@ import threading
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
 
-# =====================================================
+
 # Generate Server RSA Key Pair
-# =====================================================
+
 server_private_key = rsa.generate_private_key(
     public_exponent=65537,
     key_size=2048
@@ -19,35 +19,34 @@ server_public_bytes = server_public_key.public_bytes(
     format=serialization.PublicFormat.SubjectPublicKeyInfo
 )
 
-# Serialize Private Key (Only for demonstration)
+# Serialize Private Key 
 server_private_bytes = server_private_key.private_bytes(
     encoding=serialization.Encoding.PEM,
     format=serialization.PrivateFormat.PKCS8,
     encryption_algorithm=serialization.NoEncryption()
 )
 
-# =====================================================
+
 # Socket Setup
-# =====================================================
+
 HOST = "127.0.0.1"
 PORT = 12345
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_socket.bind((HOST, PORT))
-server_socket.listen(1)
+#Bind IP and Port
+server_socket.bind((HOST, PORT))  
+#Listen for incoming connection requests
+server_socket.listen(1)           
 
-print("======================================")
 print("SERVER STARTED")
 print(f"Listening on {HOST}:{PORT}")
-print("======================================")
 
-client_socket, addr = server_socket.accept()
+#Accept a connection
+client_socket, addr = server_socket.accept()  
 
 print(f"\nConnected to {addr}")
 
-# =====================================================
 # Exchange Public Keys
-# =====================================================
 
 # Send server public key
 client_socket.sendall(server_public_bytes)
@@ -55,21 +54,19 @@ client_socket.sendall(server_public_bytes)
 # Receive client public key
 client_public_bytes = client_socket.recv(2048)
 
+# Convert the received public key bytes into an RSA public key object
 client_public_key = serialization.load_pem_public_key(
     client_public_bytes
 )
 
 print("\nClient Public Key Received Successfully.\n")
 
-# =====================================================
-# Chat Loop (threaded so send/receive don't block each other)
-# =====================================================
-
 running = True
 
 
 def receive_loop():
-    """Continuously listen for and decrypt messages from the client."""
+
+    #Continuously listen for and decrypt messages from the client
     global running
     while running:
         try:
@@ -111,17 +108,16 @@ def receive_loop():
             running = False
             break
 
-        # Re-show the prompt since send_loop's input() call is already
-        # blocked waiting and won't print it again on its own.
-        print("\nEnter reply: ", end="", flush=True)
+    
+        print("\nEnter message: ", end="", flush=True)
 
 
 def send_loop():
-    """Continuously read operator input, encrypt it, and send it to the client."""
+    #Continuously read operator input, encrypt it, and send it to the client
     global running
     while running:
         try:
-            reply = input("\nEnter reply: ")
+            reply = input("\nEnter message: ")
         except (EOFError, KeyboardInterrupt):
             running = False
             break
