@@ -44,7 +44,7 @@ print(f"Listening on {HOST}:{PORT}")
 #Accept a connection
 client_socket, addr = server_socket.accept()  
 
-print(f"\nConnected to {addr}")
+print(f"Connected to {addr}")
 
 # Exchange Public Keys
 
